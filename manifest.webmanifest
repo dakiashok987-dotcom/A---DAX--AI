@@ -1,0 +1,10 @@
+{
+  "name": "DAKX AI — Super Creator",
+  "short_name": "DAKX AI",
+  "description": "Your all-in-one creative AI workspace",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080914",
+  "theme_color": "#080914",
+  "icons": []
+}

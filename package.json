@@ -1,1 +1,10 @@
-{ "name": "adax-backend", "version": "1.0.0", "private": true, "scripts": { "start": "node server.js" }, "engines": { "node": ">=18" } }
+{
+  "name": "dakx-ai-super-creator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DAKX AI mobile-first web app starter",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo Static web app - no build step required"
+  }
+}
