@@ -1,10 +1,13 @@
 {
-  "name": "dakx-ai-super-creator",
-  "version": "1.0.0",
+  "name": "a-dax-ai-super-creator",
+  "version": "2.0.0",
   "private": true,
-  "description": "DAKX AI mobile-first web app starter",
+  "description": "A-DAX AI all-in-one creative workspace with Node.js API backend",
   "scripts": {
-    "start": "npx serve .",
-    "build": "echo Static web app - no build step required"
+    "start": "node server.js",
+    "build": "echo Static frontend - no build step required"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

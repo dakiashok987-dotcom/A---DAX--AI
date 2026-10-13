@@ -1,37 +1,38 @@
-# DAKX AI — Super Creator
+# A-DAX AI — All-in-One Super Creator
 
-A mobile-first static web app starter with a black, neon-blue and purple design.
+A mobile-friendly AI workspace with Dashboard, AI Chat, Story to Video storyboard, Image Studio, Voice Studio, Story Writer, Code Studio, Game Creator and locally saved projects.
 
-## Included in this starter
-- Responsive dashboard
-- AI Chat draft panel (demo placeholder, not connected to a live AI model)
-- Story-to-video scene outline generator
-- Image prompt builder
-- Browser text-to-speech playback (device/browser dependent)
-- Story, code and game planning helpers
-- Local project saving with browser localStorage
-- Basic PWA manifest and service worker
+## Files
+- `index.html`, `styles.css`, `app.js`: frontend
+- `server.js`: Node.js backend API
+- `package.json`: Render start command
+- `manifest.webmanifest`, `sw.js`: install/PWA support
 
-## Run on an Android phone
-1. Extract this ZIP using your phone's file manager.
-2. Upload the extracted files to a new GitHub repository, or use a static hosting provider.
-3. For Netlify: create a new site from the repository. Build command can be left empty; publish directory is `.`.
-4. Open the published website in Chrome. Use the browser menu to choose **Add to Home screen** where available.
+## Important configuration
+The frontend calls the existing Render API at `https://a-dax-ai.onrender.com`.
 
-## Important: live AI features
-The current version is a working UI and local prompt/draft starter, not a complete AI service. Real AI chat, image generation and video rendering require provider APIs and a backend. Do not put secret API keys in `app.js` or any browser file. A server-side API endpoint should hold keys and enforce limits.
+Set secrets only in Render Dashboard → your backend service → Environment:
+- `OPENAI_API_KEY` — required for real AI chat and image generation (provider billing/limits may apply)
+- `OPENAI_CHAT_MODEL` — optional; defaults to `gpt-4.1-mini`
+- `IMAGE_MODEL` — optional; defaults to `gpt-image-1`
+- `TTS_MODEL` — optional; defaults to `gpt-4o-mini-tts`
+- `BRAVE_API_KEY` — optional; enables web search
+- `ACCESS_TOKEN` — optional; if enabled, the frontend must also be configured to send the token before protected requests will work.
 
-## Android APK
-A website can be wrapped as an Android app using a trusted WebView/Capacitor workflow, but APK creation/signing is a separate step. Test the deployed website first. This project does not include a compiled APK.
+Never put API keys in `app.js`, HTML, or any public GitHub file.
 
-## Deploy on Netlify
-- Repository root contains `index.html`.
-- Build command: leave blank.
-- Publish directory: `.`
+## Deploy
+### Backend on Render
+Deploy this repository as a **Web Service** with Node runtime. Build command can be blank or `npm install`; start command is `npm start`. Add secrets through Render Environment settings. The server listens on `process.env.PORT`.
 
-## Project files
-- `index.html` — interface and pages
-- `styles.css` — responsive neon design
-- `app.js` — navigation, local draft tools, speech, local saving
-- `manifest.webmanifest` — PWA metadata
-- `sw.js` — basic offline cache
+### Frontend on Netlify
+Deploy the repository as a static site with publish directory set to the repository root and no build command. The current CORS allowlist in `server.js` includes `https://cool-axolotl-22b926.netlify.app`. If your Netlify URL changes, update `ALLOWED_ORIGINS` in `server.js` to include the exact new origin and redeploy the backend.
+
+## Current feature notes
+- AI Chat and Image Studio call the backend endpoints `/api/chat` and `/api/image`.
+- Image generation requires a valid provider API key and access to the configured model; it may incur charges.
+- Voice Studio currently uses the browser's speech synthesis. It does not call `/api/tts` yet.
+- Story to Video creates a storyboard/prompt plan; it does not render video files.
+- Story Writer, Code Studio and Game Creator currently create structured starter drafts, not full AI-generated content or playable builds.
+- My Projects uses local browser storage and does not sync across devices.
+- Search endpoint exists on the backend but requires `BRAVE_API_KEY` and is not yet exposed as a frontend tool.
