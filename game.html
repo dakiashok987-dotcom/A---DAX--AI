@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>A-DAX 2D Shooter</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080914;color:#fff;font-family:Arial,sans-serif;text-align:center}
+main{max-width:700px;margin:auto;padding:14px}
+h1{font-size:25px;color:#9b8cff;margin:8px}
+p{color:#b8bddb;font-size:13px}
+.stats{display:flex;justify-content:space-around;gap:8px;margin:14px 0}
+.stats span{background:#171a30;padding:10px;border-radius:9px;flex:1;font-size:13px}
+canvas{display:block;width:100%;height:auto;background:#090d20;border:2px solid #625cff;border-radius:12px;touch-action:none}
+.controls{display:flex;justify-content:center;gap:12px;margin:15px 0}
+button{border:0;border-radius:12px;padding:15px 22px;background:linear-gradient(120deg,#347dff,#9254ff);color:white;font-weight:bold;font-size:16px;touch-action:manipulation}
+#fire{background:linear-gradient(120deg,#f14f85,#ff8b49)}
+#restart{padding:11px 18px;font-size:13px}
+</style>
+</head>
+<body>
+<main>
+<h1>🎮 A-DAX SPACE DEFENDER</h1>
+<p>દુશ્મનોને હરાવો અને તમારો સ્કોર વધારો!</p>
+<div class="stats">
+<span>સ્કોર: <b id="score">0</b></span>
+<span>હેલ્થ: <b id="health">100</b></span>
+<span>લેવલ: <b id="level">1</b></span>
+</div>
+<canvas id="game" width="600" height="720"></canvas>
+<div class="controls">
+<button id="left">◀</button>
+<button id="fire">🔥 FIRE</button>
+<button id="right">▶</button>
+</div>
+<button id="restart">↻ ફરીથી રમો</button>
+<p>મોબાઇલમાં ◀ ▶ દબાવીને પ્લેયર ખસેડો અને FIRE દબાવીને ગોળી ચલાવો.</p>
+</main>
+<script>
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const $=id=>document.getElementById(id);
+let player,bullets,enemies,score,health,frame,over,keys,stars;
+function reset(){
+ player={x:280,y:635,w:40,h:35,speed:5};
+ bullets=[];enemies=[];score=0;health=100;frame=0;over=false;
+ keys={left:false,right:false,fire:false};
+ stars=Array.from({length:65},()=>({x:Math.random()*600,y:Math.random()*720,s:Math.random()*2+1}));
+ updateStats();
+}
+function updateStats(){
+ $("score").textContent=score;
+ $("health").textContent=health;
+ $("level").textContent=1+Math.floor(score/100);
+}
+function shoot(){
+ if(!over)bullets.push({x:player.x+player.w/2-3,y:player.y,w:6,h:17,s:9});
+}
+function enemy(){
+ let size=26+Math.random()*16;
+ enemies.push({x:Math.random()*(600-size),y:-size,w:size,h:size,s:1.5+Math.random()*1.5+score/500});
+}
+function hit(a,b){
+ return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+}
+function drawShip(){
+ ctx.fillStyle="#58e7ff";
+ ctx.beginPath();
+ ctx.moveTo(player.x+player.w/2,player.y);
+ ctx.lineTo(player.x+player.w,player.y+player.h);
+ ctx.lineTo(player.x+player.w/2,player.y+player.h-8);
+ ctx.lineTo(player.x,player.y+player.h);
+ ctx.closePath();ctx.fill();
+ ctx.fillStyle="#a68bff";
+ ctx.fillRect(player.x+14,player.y+17,12,12);
+}
+function drawEnemy(e){
+ ctx.fillStyle="#ff527f";
+ ctx.beginPath();
+ ctx.arc(e.x+e.w/2,e.y+e.h/2,e.w/2,0,Math.PI*2);
+ ctx.fill();
+ ctx.fillStyle="#fff";
+ ctx.fillRect(e.x+7,e.y+10,5,5);
+ ctx.fillRect(e.x+e.w-12,e.y+10,5,5);
+}
+function endGame(){
+ over=true;
+ ctx.fillStyle="rgba(4,5,18,.82)";
+ ctx.fillRect(0,0,600,720);
+ ctx.textAlign="center";
+ ctx.fillStyle="#fff";
+ ctx.font="bold 42px Arial";
+ ctx.fillText("GAME OVER",300,320);
+ ctx.font="24px Arial";
+ ctx.fillText("સ્કોર: "+score,300,365);
+ ctx.font="17px Arial";
+ ctx.fillText("ફરીથી રમવા Restart દબાવો",300,410);
+}
+function loop(){
+ if(over)return;
+ frame++;
+ ctx.clearRect(0,0,600,720);
+ ctx.fillStyle="#080c1d";ctx.fillRect(0,0,600,720);
+ ctx.fillStyle="#a2aaff";
+ stars.forEach(st=>{
+  st.y+=st.s;
+  if(st.y>720){st.y=0;st.x=Math.random()*600}
+  ctx.globalAlpha=.4+st.s/4;
+  ctx.fillRect(st.x,st.y,2,2);
+ });
+ ctx.globalAlpha=1;
+ if(keys.left)player.x-=player.speed;
+ if(keys.right)player.x+=player.speed;
+ player.x=Math.max(0,Math.min(600-player.w,player.x));
+ if(keys.fire&&frame%9===0)shoot();
+ if(frame%48===0)enemy();
+ bullets.forEach(b=>b.y-=b.s);
+ bullets=bullets.filter(b=>b.y+b.h>0);
+ enemies.forEach(e=>e.y+=e.s);
+ for(let i=enemies.length-1;i>=0;i--){
+  const e=enemies[i];
+  if(e.y>720){enemies.splice(i,1);health-=10;continue}
+  for(let j=bullets.length-1;j>=0;j--){
+   if(hit(e,bullets[j])){
+    enemies.splice(i,1);bullets.splice(j,1);score+=10;break;
+   }
+  }
+ }
+ bullets.forEach(b=>{ctx.fillStyle="#ffe66d";ctx.fillRect(b.x,b.y,b.w,b.h)});
+ enemies.forEach(drawEnemy);
+ drawShip();
+ updateStats();
+ if(health<=0){endGame();return}
+ requestAnimationFrame(loop);
+}
+function start(){reset();loop()}
+function bindHold(id,key){
+ const el=$(id);
+ const down=e=>{e.preventDefault();keys[key]=true};
+ const up=e=>{e.preventDefault();keys[key]=false};
+ el.addEventListener("pointerdown",down);
+ el.addEventListener("pointerup",up);
+ el.addEventListener("pointercancel",up);
+ el.addEventListener("pointerleave",up);
+}
+bindHold("left","left");
+bindHold("right","right");
+bindHold("fire","fire");
+$("restart").addEventListener("click",start);
